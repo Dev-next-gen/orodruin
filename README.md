@@ -8,7 +8,7 @@
 
 Palantir Gotham costs $25M+/year. Intelligence capabilities shouldn't require a defense budget. This platform aggregates the same quality of open-source intelligence using public APIs, declassified data, and AI-powered analysis.
 
-Inspired by Palantir's open-source Ontology SDK ([gotham-platform-python](https://github.com/palantir/gotham-platform-python)), Blueprint UI components, and their open architecture principles (Apache Iceberg, Spark, ElasticSearch).
+Inspired by Palantir's Ontology SDK ([gotham-platform-python](https://github.com/palantir/gotham-platform-python)), Blueprint UI components, and their open architecture principles (Apache Iceberg, Spark, ElasticSearch).
 
 ## Architecture
 
