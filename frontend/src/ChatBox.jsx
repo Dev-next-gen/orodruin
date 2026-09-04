@@ -26,6 +26,7 @@ function mdToHtml(text) {
 }
 
 export default function ChatBox({ lang, labels, open, setOpen, onActions }) {
+  const swipeRef = useRef(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -117,7 +118,20 @@ export default function ChatBox({ lang, labels, open, setOpen, onActions }) {
   };
 
   return (
-    <div className="chat-win" style={style}>
+    <div className="chat-win" style={style}
+      onTouchStart={(e) => { swipeRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, el: e.currentTarget, drag: false }; }}
+      onTouchMove={(e) => {
+        const t = swipeRef.current; if (!t) return;
+        const dx = e.touches[0].clientX - t.x, dy = e.touches[0].clientY - t.y;
+        if (!t.drag && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) { t.drag = true; t.el.style.transition = "none"; }
+        if (t.drag && dx > 0) { t.el.style.transform = "translateX(" + dx + "px)"; }
+      }}
+      onTouchEnd={(e) => {
+        const t = swipeRef.current; if (!t) return; swipeRef.current = null;
+        t.el.style.transition = ""; t.el.style.transform = "";
+        const end = e.changedTouches[0] ? e.changedTouches[0].clientX : t.x;
+        if (t.drag && end - t.x > 70) setOpen(false);
+      }}>
       <div className="chat-head" onMouseDown={onDown}>
         <span className="chat-head-title">{labels.analyst}</span>
         <div className="chat-nodrag chat-head-btns">

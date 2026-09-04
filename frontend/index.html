@@ -44,9 +44,43 @@
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
     }
     </script>
+      <script defer src="https://analytics.nextgen-labs.net/script.js" data-website-id="3a13df69-524b-41ab-9621-d364af894713"></script>
+    <style id="splash-style">
+      #splash{position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at 50% 45%,#0d141c 0%,#080b10 72%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;opacity:1;transition:opacity .6s ease}
+      #splash.sp-hide{opacity:0;pointer-events:none}
+      #splash .sp-badge{width:148px;height:148px;animation:sp-pop .8s cubic-bezier(.2,.8,.2,1) both}
+      #splash svg{width:100%;height:100%;display:block;filter:drop-shadow(0 0 10px rgba(69,200,224,.35))}
+      #splash .sp-scan{transform-origin:75px 75px;animation:sp-rot 2.2s linear infinite}
+      #splash .sp-ring{transform-origin:75px 75px;animation:sp-pulse 2.1s ease-out infinite}
+      #splash .sp-name{font:800 40px/1 system-ui,'Segoe UI',sans-serif;letter-spacing:.14em;color:#e9eff6;animation:sp-fade .9s .25s both}
+      #splash .sp-name span{color:#45c8e0}
+      #splash .sp-tag{font:600 11px/1 system-ui,sans-serif;letter-spacing:.44em;color:#5f7183;text-transform:uppercase;animation:sp-fade .9s .5s both}
+      #splash .sp-bar{width:150px;height:2px;background:rgba(69,200,224,.14);border-radius:2px;overflow:hidden}
+      #splash .sp-bar i{display:block;height:100%;width:0;background:#45c8e0;border-radius:2px;box-shadow:0 0 8px #45c8e0;animation:sp-load 2.7s ease-in-out forwards}
+      #splash .sp-skip{position:absolute;bottom:26px;font:500 10px/1 system-ui,sans-serif;letter-spacing:.2em;color:#3a4756;text-transform:uppercase}
+      @keyframes sp-pop{0%{opacity:0;transform:scale(.7)}100%{opacity:1;transform:scale(1)}}
+      @keyframes sp-rot{to{transform:rotate(360deg)}}
+      @keyframes sp-pulse{0%{opacity:.55;transform:scale(.58)}100%{opacity:0;transform:scale(1.3)}}
+      @keyframes sp-fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+      @keyframes sp-load{0%{width:0}100%{width:100%}}
+      @media (prefers-reduced-motion:reduce){#splash .sp-scan,#splash .sp-ring,#splash .sp-bar i{animation:none}}
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <div id="splash">
+      <div class="sp-badge"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg"><circle class="sp-ring" cx="75" cy="75" r="52" stroke="#45c8e0" stroke-width="1"/><circle cx="75" cy="75" r="70" stroke="#1d3846" stroke-width="1"/><circle cx="75" cy="75" r="46" stroke="#2a5568" stroke-width="1"/><circle cx="75" cy="75" r="46" stroke="#45c8e0" stroke-width="1.4" opacity="0.85"/><ellipse cx="75" cy="75" rx="18" ry="46" stroke="#45c8e0" stroke-width="1" opacity="0.5"/><ellipse cx="75" cy="75" rx="46" ry="18" stroke="#45c8e0" stroke-width="1" opacity="0.5"/><line x1="75" y1="29" x2="75" y2="121" stroke="#45c8e0" stroke-width="1" opacity="0.5"/><line x1="75" y1="2" x2="75" y2="12" stroke="#45c8e0" stroke-width="1.5"/><line x1="75" y1="138" x2="75" y2="148" stroke="#45c8e0" stroke-width="1.5"/><line x1="2" y1="75" x2="12" y2="75" stroke="#45c8e0" stroke-width="1.5"/><line x1="138" y1="75" x2="148" y2="75" stroke="#45c8e0" stroke-width="1.5"/><g class="sp-scan"><line x1="75" y1="75" x2="75" y2="29" stroke="#45c8e0" stroke-width="1.5"/><circle cx="75" cy="29" r="3" fill="#45c8e0"/></g></svg></div>
+      <div class="sp-name">OROD<span>RUIN</span></div>
+      <div class="sp-tag">Open-source intelligence</div>
+      <div class="sp-bar"><i></i></div>
+      <div class="sp-skip">Cliquer pour passer</div>
+    </div>
+    <script>
+      (function(){var s=document.getElementById('splash');if(!s)return;
+      function go(){if(s.classList.contains('sp-hide'))return;s.classList.add('sp-hide');setTimeout(function(){s&&s.parentNode&&s.parentNode.removeChild(s);},650);}
+      s.addEventListener('click',go);setTimeout(go,3000);})();
+    </script>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

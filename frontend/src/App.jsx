@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import MapView from "./MapView.jsx";
 import GraphView from "./GraphView.jsx";
 // Cesium is heavy (~MBs): only load the Google 3D globe when it's actually selected
@@ -149,21 +149,22 @@ export default function App() {
   }
   const closeCam = (uid) => setCamPlayers((ps) => ps.filter((p) => p.uid !== uid));
   const updateCam = (uid, patch) => setCamPlayers((ps) => ps.map((p) => (p.uid === uid ? { ...p, ...patch } : p)));
-  const [showFires, setShowFires] = useState(_init("showFires", _pon("fires")));
-  const [showQuakes, setShowQuakes] = useState(_init("showQuakes", _pon("quakes")));
-  const [showEonet, setShowEonet] = useState(_init("showEonet", _pon("eonet")));
-  const [showVessels, setShowVessels] = useState(_init("showVessels", _pon("vessels")));
-  const [showFlights, setShowFlights] = useState(_init("showFlights", _pon("flights")));
-  const [showDisasters, setShowDisasters] = useState(_init("showDisasters", _pon("disasters")));
+  const _mobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const [showFires, setShowFires] = useState(_init("showFires", true));
+  const [showQuakes, setShowQuakes] = useState(_init("showQuakes", true));
+  const [showEonet, setShowEonet] = useState(_init("showEonet", true));
+  const [showVessels, setShowVessels] = useState(_init("showVessels", !_mobile));
+  const [showFlights, setShowFlights] = useState(_init("showFlights", !_mobile));
+  const [showDisasters, setShowDisasters] = useState(_init("showDisasters", true));
   const [showSat, setShowSat] = useState(_init("showSat", _pon("sat")));
-  const [showSats, setShowSats] = useState(_init("showSats", _pon("sats")));
-  const [showCams, setShowCams] = useState(_init("showCams", _pon("cams")));
-  const [showTraffic, setShowTraffic] = useState(_init("showTraffic", _pon("traffic")));
-  const [showRoads, setShowRoads] = useState(_init("showRoads", _pon("roads")));
+  const [showSats, setShowSats] = useState(_init("showSats", true));
+  const [showCams, setShowCams] = useState(_init("showCams", !_mobile));
+  const [showTraffic, setShowTraffic] = useState(_init("showTraffic", !_mobile));
+  const [showRoads, setShowRoads] = useState(_init("showRoads", !_mobile));
   const [showWeather, setShowWeather] = useState(_init("showWeather", _pon("weather")));
-  const [showCyber, setShowCyber] = useState(_init("showCyber", _pon("cyber")));
-  const [showInfra, setShowInfra] = useState(_init("showInfra", _pon("infra")));
-  const [showPower, setShowPower] = useState(_init("showPower", _pon("power")));
+  const [showCyber, setShowCyber] = useState(_init("showCyber", true));
+  const [showInfra, setShowInfra] = useState(_init("showInfra", true));
+  const [showPower, setShowPower] = useState(_init("showPower", !_mobile));
   const [showAir, setShowAir] = useState(_init("showAir", _pon("air")));
   const [airProduct, setAirProduct] = useState("no2");
   const [wxMode, setWxMode] = useState("precip");
@@ -177,7 +178,40 @@ export default function App() {
   const [publicMode, setPublicMode] = useState(false);
   useEffect(() => { fetch("/api/config").then((r) => r.json()).then((c) => setPublicMode(!!c.public_mode)).catch(() => {}); }, []);
   const [showGoogleHD, setShowGoogleHD] = useState(false);
-  const [basemap, setBasemap] = useState(_P.get("basemap") || _init("basemap", "dark"));
+  const [basemap, setBasemap] = useState(_P.get("basemap") || _init("basemap", "globe"));
+  const [menuOpen, setMenuOpen] = useState(false);
+  const sidebarRef = useRef(null);
+  useEffect(() => {
+    const el = sidebarRef.current; if (!el) return;
+    let st = null;
+    const onStart = (e) => {
+      if (e.touches.length === 2) st = { two: true, y: (e.touches[0].clientY + e.touches[1].clientY) / 2 };
+      else st = { x: e.touches[0].clientX, y: e.touches[0].clientY, drag: false };
+    };
+    const onMove = (e) => {
+      if (!st) return;
+      if (e.touches.length === 2) {
+        const ay = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        if (st.two) { el.scrollTop += st.y - ay; st.y = ay; e.preventDefault(); }
+        return;
+      }
+      if (st.two) return;
+      const dx = e.touches[0].clientX - st.x, dy = e.touches[0].clientY - st.y;
+      if (!st.drag && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8) { st.drag = true; el.style.transition = "none"; }
+      if (st.drag && dx < 0) { el.style.transform = "translateX(" + dx + "px)"; e.preventDefault(); }
+    };
+    const onEnd = (e) => {
+      if (!st) return; const s0 = st; st = null;
+      if (s0.two) return;
+      el.style.transition = ""; el.style.transform = "";
+      const end = e.changedTouches[0] ? e.changedTouches[0].clientX : s0.x;
+      if (s0.drag && end - s0.x < -70) setMenuOpen(false);
+    };
+    el.addEventListener("touchstart", onStart, { passive: true });
+    el.addEventListener("touchmove", onMove, { passive: false });
+    el.addEventListener("touchend", onEnd, { passive: true });
+    return () => { el.removeEventListener("touchstart", onStart); el.removeEventListener("touchmove", onMove); el.removeEventListener("touchend", onEnd); };
+  }, []);
   const [autoRefresh, setAutoRefresh] = useState(_init("autoRefresh", true));
   const [sidebarW, setSidebarW] = useState(_init("sidebarW", 340));
 
@@ -341,8 +375,10 @@ export default function App() {
 
   return (
     <div className="app" style={{ gridTemplateColumns: `${sidebarW}px 1fr` }}>
+      <button className="menu-toggle" onClick={() => setMenuOpen((v) => !v)} aria-label="Menu">☰</button>
+      {menuOpen && <div className="sidebar-backdrop" onClick={() => setMenuOpen(false)} />}
       <div className="sidebar-resize" style={{ left: sidebarW - 3 }} onMouseDown={startSidebarResize} title="Redimensionner la barre latérale" />
-      <aside className="sidebar" dir={lang === "ar" ? "rtl" : "ltr"}>
+      <aside ref={sidebarRef} className={"sidebar" + (menuOpen ? " open" : "")} dir={lang === "ar" ? "rtl" : "ltr"}>
         <div className="brand-row">
           <div className="brand"><span className="brand-name">OROD<span className="brand-acc">RUIN</span></span></div>
           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -897,12 +933,15 @@ export default function App() {
         )}
 
         <div className="credit-footer">
+          <a className="credit-gh" href="https://github.com/Dev-next-gen/orodruin" target="_blank" rel="noopener noreferrer" title="Code source sur GitHub" aria-label="GitHub">
+            <svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          </a>
           <span className="credit-dev">{t("devNotice")}</span>
           <span className="credit-line">
             <span className="credit-by">Developed by</span>{" "}
             <a className="credit-brand" href="https://nextgen-labs.net/" target="_blank" rel="noopener noreferrer">NextGen Lab's</a>
             {" · "}
-            <a className="credit-brand" href="https://github.com/Dev-next-gen/osint-platform" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a className="credit-brand" href="https://github.com/Dev-next-gen/orodruin" target="_blank" rel="noopener noreferrer">GitHub</a>
           </span>
         </div>
 
