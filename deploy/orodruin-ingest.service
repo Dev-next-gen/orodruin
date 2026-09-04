@@ -1,0 +1,18 @@
+# Orodruin data ingestion loop. Copy to /etc/systemd/system/orodruin-ingest.service
+# then: sudo systemctl daemon-reload && sudo systemctl enable --now orodruin-ingest
+# Refreshes GDELT/FIRMS/GDACS/AIS/sanctions every 15 min (--loop 900).
+[Unit]
+Description=Orodruin data ingestion
+After=network.target orodruin-api.service
+
+[Service]
+Type=simple
+User=orodruin
+WorkingDirectory=/opt/orodruin/backend
+EnvironmentFile=/opt/orodruin/backend/.env
+ExecStart=/opt/orodruin/backend/.venv/bin/python -m app.ingest.run --loop 900
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

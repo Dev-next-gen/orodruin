@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:16
+    container_name: osint_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: osint
+      POSTGRES_PASSWORD: osint
+      POSTGRES_DB: osint
+    ports:
+      - "5544:5432"
+    volumes:
+      - ./data/pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U osint"]
+      interval: 5s
+      timeout: 5s
+      retries: 20

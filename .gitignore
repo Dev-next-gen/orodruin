@@ -1,0 +1,28 @@
+# secrets — never commit
+.env
+.env.*
+!.env.example
+backend/.env
+*.pem
+*.key
+
+# python
+backend/.venv/
+**/__pycache__/
+*.pyc
+
+# node / build
+frontend/node_modules/
+frontend/dist/
+
+# runtime data & logs
+data/
+logs/
+*.log
+*.sqlite
+*.db
+
+# editor / os
+.DS_Store
+.vscode/
+.idea/

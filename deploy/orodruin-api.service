@@ -1,0 +1,17 @@
+# Orodruin API (FastAPI/uvicorn). Copy to /etc/systemd/system/orodruin-api.service
+# then: sudo systemctl daemon-reload && sudo systemctl enable --now orodruin-api
+[Unit]
+Description=Orodruin API (FastAPI)
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=orodruin
+WorkingDirectory=/opt/orodruin/backend
+EnvironmentFile=/opt/orodruin/backend/.env
+ExecStart=/opt/orodruin/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
